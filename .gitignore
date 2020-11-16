@@ -1,0 +1,6 @@
+productinfo/.idea/*
+productinfo/client/client
+productinfo/service/service
+
+*.sum
+
