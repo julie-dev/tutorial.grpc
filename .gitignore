@@ -4,3 +4,6 @@ productinfo/service/service
 
 *.sum
 
+interceptors/.idea/*
+interceptors/client/client
+interceptors/server/server
