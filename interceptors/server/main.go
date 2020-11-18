@@ -5,7 +5,9 @@ import (
 	"github.com/golang/protobuf/ptypes/wrappers"
 	wrapper "github.com/golang/protobuf/ptypes/wrappers"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/reflection"
+	"google.golang.org/grpc/status"
 	pb "interceptors/server/gen"
 	"io"
 	"log"
@@ -30,11 +32,24 @@ type server struct {
 func (s *server) AddOrder(ctx context.Context, orderReq *pb.Order) (*wrappers.StringValue, error) {
 	orderMap[orderReq.Id] = *orderReq
 
-	// for deadline test
-	time.Sleep(time.Second * 5)
+	ch := make(chan bool)
 
-	log.Println("Order : ",  orderReq.Id, " -> Added")
-	return &wrapper.StringValue{Value: "Order Added: " + orderReq.Id}, nil
+	go func(done chan bool) {
+		time.Sleep(60 * time.Second)
+		done <- true
+	}(ch)
+
+	select {
+	case <-ch:
+		log.Println("Order : ",  orderReq.Id, " -> Added")
+		return &wrapper.StringValue{Value: "Order Added: " + orderReq.Id}, nil
+	case <-ctx.Done():
+		if ctx.Err() == context.DeadlineExceeded {
+			log.Printf("Error Occured : %v", ctx.Err().Error())
+		}
+	}
+
+	return nil, status.Error(codes.Internal, "AddOrder")
 }
 
 // Simple RPC
@@ -137,16 +152,16 @@ func orderUnaryServerInterceptor(ctx context.Context, req interface{}, info *grp
 	log.Println("======= [Server Interceptor] ", info.FullMethod)
 	log.Printf(" Pre Proc Message : %s", req)
 
-
 	// Invoking the handler to complete the normal execution of a unary RPC.
 	m, err := handler(ctx, req)
 
 	// Post processing logic
-	if ctx.Err() == context.DeadlineExceeded {
-		log.Printf("Error Occured : %v", ctx.Err().Error())
+	if err != nil {
+		log.Printf("%s", err.Error())
 	} else {
 		log.Printf(" Post Proc Message : %s", m)
 	}
+
 	return m, err
 }
 

@@ -7,3 +7,4 @@ productinfo/service/service
 interceptors/.idea/*
 interceptors/client/client
 interceptors/server/server
+interceptors/.DS_Store
