@@ -2,8 +2,10 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"github.com/golang/protobuf/ptypes/wrappers"
 	wrapper "github.com/golang/protobuf/ptypes/wrappers"
+	epb "google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/reflection"
@@ -30,12 +32,32 @@ type server struct {
 
 // Simple RPC
 func (s *server) AddOrder(ctx context.Context, orderReq *pb.Order) (*wrappers.StringValue, error) {
+	// invalid request id handling
+	if orderReq.Id == "-1" {
+		errorStatus := status.New(codes.InvalidArgument, "Invalid Id received")
+		ds, err := errorStatus.WithDetails(
+			&epb.BadRequest_FieldViolation{
+				Field:       "ID",
+				Description: fmt.Sprintf(
+					"Order ID received is not valid %s : %s",
+					orderReq.Id,
+					orderReq.Description,
+					),
+			},
+		)
+		if err != nil {
+			return nil, errorStatus.Err()
+		}
+
+		return nil, ds.Err()
+	}
+
 	orderMap[orderReq.Id] = *orderReq
 
 	ch := make(chan bool)
 
 	go func(done chan bool) {
-		time.Sleep(60 * time.Second)
+		time.Sleep(1 * time.Second)
 		done <- true
 	}(ch)
 
