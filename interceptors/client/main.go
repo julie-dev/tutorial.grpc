@@ -2,10 +2,12 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"google.golang.org/grpc/status"
 	pb "interceptors/client/gen"
 	//wrapper "github.com/golang/protobuf/ptypes/wrappers"
 	"google.golang.org/grpc"
+	hello_pb "google.golang.org/grpc/examples/helloworld/helloworld"
 	"io"
 	"log"
 	"time"
@@ -33,7 +35,7 @@ func main() {
 	defer cancel()
 
 	// Add Order
-	order1 := pb.Order{Id: "-1", Items:[]string{"iPhone XS", "Mac Book Pro"}, Destination:"San Jose, CA", Price:2300.00}
+	order1 := pb.Order{Id: "101", Items:[]string{"iPhone XS", "Mac Book Pro"}, Destination:"San Jose, CA", Price:2300.00}
 	res, addErr := c.AddOrder(ctx, &order1)
 	if addErr != nil {
 		got := status.Code(addErr)
@@ -41,6 +43,18 @@ func main() {
 	} else {
 		log.Print("AddOrder Response -> ", res.Value)
 	}
+
+	// hello RPC
+	helloClinent := hello_pb.NewGreeterClient(conn)
+
+	helloCtx, helloCancle := context.WithCancel(context.Background())
+	defer helloCancle()
+
+	helloResponse, err := helloClinent.SayHello(helloCtx, &hello_pb.HelloRequest{Name:"Julie :-)"})
+	if err != nil {
+		log.Fatalf("orderManagementClient.SayHello(_) = _, %v", err)
+	}
+	fmt.Println("Greeting: ", helloResponse.Message)
 
 	// Get Order
 	//retrievedOrder , err := c.GetOrder(ctx, &wrapper.StringValue{Value: "106"})

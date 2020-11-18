@@ -8,6 +8,7 @@ import (
 	epb "google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	hello_pb "google.golang.org/grpc/examples/helloworld/helloworld"
 	"google.golang.org/grpc/reflection"
 	"google.golang.org/grpc/status"
 	pb "interceptors/server/gen"
@@ -22,6 +23,16 @@ const (
 	port           = ":50051"
 	orderBatchSize = 3
 )
+
+type helloServer struct {
+	hello_pb.UnimplementedGreeterServer
+}
+
+// SayHello implements helloworld.GreeterServer
+func (s *helloServer) SayHello(ctx context.Context, in *hello_pb.HelloRequest) (*hello_pb.HelloReply, error) {
+	log.Printf("Greeter Service - SayHello RPC")
+	return &hello_pb.HelloReply{Message: "Hello " + in.Name}, nil
+}
 
 var orderMap = make(map[string]pb.Order)
 
@@ -231,6 +242,10 @@ func main() {
 		grpc.UnaryInterceptor(orderUnaryServerInterceptor),
 		grpc.StreamInterceptor(orderServerStreamInterceptor))
 	pb.RegisterOrderManagementServer(s, &server{})
+
+	// Register Greeter Service on gRPC orderMgtServer
+	hello_pb.RegisterGreeterServer(s, &helloServer{})
+
 	// Register reflection service on gRPC server.
 	reflection.Register(s)
 	if err := s.Serve(lis); err != nil {
