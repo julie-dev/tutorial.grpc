@@ -8,3 +8,8 @@ interceptors/.idea/*
 interceptors/client/client
 interceptors/server/server
 interceptors/.DS_Store
+
+grpc-gateway/.idea/*
+grpc-gateway/client/client
+grpc-gateway/server/server
+grpc-gateway/.DS_Store
