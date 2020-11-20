@@ -13,3 +13,5 @@ grpc-gateway/.idea/*
 grpc-gateway/client/client
 grpc-gateway/server/server
 grpc-gateway/.DS_Store
+
+healthcheck_client/healthcheck_client

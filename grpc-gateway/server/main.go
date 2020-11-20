@@ -13,9 +13,9 @@ import (
 
 	wrapper "github.com/golang/protobuf/ptypes/wrappers"
 	"github.com/google/uuid"
-	pb "grpc-gateway/server/ecommerce"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/reflection"
+	pb "grpc-gateway/server/ecommerce"
+	"grpc-gateway/server/healthcheck"
 )
 
 const (
@@ -58,8 +58,8 @@ func main() {
 	}
 	s := grpc.NewServer()
 	pb.RegisterProductInfoServer(s, &server{})
-	// Register reflection service on gRPC server.
-	reflection.Register(s)
+	healthcheck.RegisterHealthServer(s, NewHealthChecker())
+
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}
