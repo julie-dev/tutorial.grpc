@@ -1,13 +1,11 @@
 package main
 
 import (
-	"bufio"
 	"context"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
-	"strings"
 	"time"
 
 	"google.golang.org/grpc"
@@ -51,6 +49,9 @@ func main() {
 
 	// Create a gRPC server client.
 	client := pb.NewDemoServiceClient(conn)
+  ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
 	fmt.Println("Start to call the method called SayHello every 3 seconds")
 	go func() {
 		for {
@@ -63,12 +64,8 @@ func main() {
 			}
 			time.Sleep(3 * time.Second)
 		}
+    cancel()
 	}()
-	scanner := bufio.NewScanner(os.Stdin)
-	fmt.Println("You can press n or N to stop the process of client")
-	for scanner.Scan() {
-		if strings.ToLower(scanner.Text()) == "n" {
-			os.Exit(0)
-		}
-	}
+
+  <-ctx.Done()
 }

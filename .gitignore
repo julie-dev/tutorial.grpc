@@ -13,5 +13,11 @@ grpc-gateway/.idea/*
 grpc-gateway/client/client
 grpc-gateway/server/server
 grpc-gateway/.DS_Store
+grpc-gateway/healthcheck_client/healthcheck_client
 
 healthcheck_client/healthcheck_client
+
+grpc-server-with-prometheus/.idea/*
+grpc-server-with-prometheus/client/client
+
+basic-authentication/
