@@ -49,7 +49,7 @@ func main() {
 
 	// Create a gRPC server client.
 	client := pb.NewDemoServiceClient(conn)
-  ctx, cancel := context.WithCancel(context.Background())
+  	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	fmt.Println("Start to call the method called SayHello every 3 seconds")
