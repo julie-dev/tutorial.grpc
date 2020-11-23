@@ -26,8 +26,9 @@ func main() {
 	// Register client metrics to registry.
 	reg.MustRegister(grpcMetrics)
 	// Create a insecure gRPC channel to communicate with the server.
+  server := os.Getenv("SERVER_ADDR")
 	conn, err := grpc.Dial(
-		fmt.Sprintf("localhost:%v", 9093),
+		fmt.Sprintf("%v:%v", server, 9093),
 		grpc.WithUnaryInterceptor(grpcMetrics.UnaryClientInterceptor()),
 		grpc.WithStreamInterceptor(grpcMetrics.StreamClientInterceptor()),
 		grpc.WithInsecure(),
